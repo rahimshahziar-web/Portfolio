@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow | To-Do App by Rahim Shah Ziar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f0ff 0%, #c8e2f5 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            transition: background 0.3s;
+        }
+
+        body.dark {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 1rem 1.8rem;
+        }
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+        body.dark .logo h1 {
+            color: #a5f3fc;
+        }
+        .theme-btn {
+            background: rgba(0,0,0,0.2);
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* add task section */
+        .add-task {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .add-task input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 3rem;
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .add-task button {
+            background: #1e6f5c;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 3rem;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .add-task button:hover {
+            background: #0f5546;
+            transform: scale(1.02);
+        }
+
+        /* filter bar */
+        .filter-bar {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: rgba(255,255,255,0.8);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .filter-btn.active {
+            background: #1e6f5c;
+            color: white;
+        }
+        body.dark .filter-btn {
+            background: #334155;
+            color: #e2e8f0;
+        }
+        body.dark .filter-btn.active {
+            background: #2c9b87;
+            color: #0a1a1a;
+        }
+
+        /* stats */
+        .stats {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #2c5a4a;
+        }
+        body.dark .stats {
+            color: #7ab3a8;
+        }
+
+        /* tasks list */
+        .tasks-list {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            min-height: 300px;
+        }
+        body.dark .tasks-list {
+            background: rgba(30,41,59,0.9);
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #d4e6e0;
+            transition: 0.2s;
+        }
+        body.dark .task-item {
+            border-bottom-color: #475569;
+        }
+        .task-item:hover {
+            background: rgba(0,0,0,0.03);
+            border-radius: 1rem;
+        }
+        .task-check {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+        }
+        .task-text {
+            flex: 1;
+            font-size: 1rem;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .task-text.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .task-actions button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.3rem;
+            transition: 0.2s;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+        }
+        .edit-btn {
+            color: #2c7da0;
+        }
+        .edit-btn:hover {
+            background: #2c7da020;
+        }
+        .delete-btn {
+            color: #e06c6c;
+        }
+        .delete-btn:hover {
+            background: #e06c6c20;
+        }
+
+        .empty-msg {
+            text-align: center;
+            padding: 2rem;
+            color: #6c8b82;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #4a6f68;
+        }
+        body.dark footer {
+            color: #7e9e95;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="app-header">
+        <div class="logo">
+            <h1><i class="fas fa-check-circle"></i> TaskFlow</h1>
+        </div>
+        <button class="theme-btn" id="themeToggle"><i class="fas fa-moon"></i> Dark/Light</button>
+    </div>
+
+    <div class="add-task">
+        <input type="text" id="taskInput" placeholder="Write a new task... e.g., Learn JavaScript" autocomplete="off">
+        <button id="addBtn"><i class="fas fa-plus"></i> Add Task</button>
+    </div>
+
+    <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">📋 All</button>
+        <button class="filter-btn" data-filter="active">⏳ Active</button>
+        <button class="filter-btn" data-filter="completed">✅ Completed</button>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="tasks-list" id="tasksContainer">
+        <div class="empty-msg"><i class="fas fa-clipboard-list"></i> No tasks yet. Add one above!</div>
+    </div>
+
+    <footer>
+        <p>📌 Tasks are saved in your browser. Close and reopen — they'll still be here.</p>
+        <p>✨ Developed by <strong>Rahim Shah Ziar</strong> — Web Developer</p>
+    </footer>
+</div>
+
+<script>
+    // ---------- Task Manager ----------
+    let tasks = [];
+
+    // Load tasks from localStorage
+    function loadTasks() {
+        const stored = localStorage.getItem("taskflow_tasks");
+        if (stored) {
+            tasks = JSON.parse(stored);
+        } else {
+            // sample tasks for demo
+            tasks = [
+                { id: 1, text: "Build Calendar App", completed: true },
+                { id: 2, text: "Create To-Do List App", completed: false },
+                { id: 3, text: "Learn React.js", completed: false },
+                { id: 4, text: "Upload projects to GitHub", completed: false },
+                { id: 5, text: "Build Portfolio Website", completed: true }
+            ];
+        }
+        renderTasks();
+    }
+
+    // Save to localStorage
+    function saveTasks() {
+        localStorage.setItem("taskflow_tasks", JSON.stringify(tasks));
+    }
+
+    let currentFilter = "all";
+
+    function renderTasks() {
+        let filteredTasks = tasks;
+        if (currentFilter === "active") {
+            filteredTasks = tasks.filter(t => !t.completed);
+        } else if (currentFilter === "completed") {
+            filteredTasks = tasks.filter(t => t.completed);
+        }
+
+        const container = document.getElementById("tasksContainer");
+        const statsDiv = document.getElementById("stats");
+        const activeCount = tasks.filter(t => !t.completed).length;
+        const completedCount = tasks.filter(t => t.completed).length;
+
+        statsDiv.innerHTML = `<i class="fas fa-tasks"></i> ${activeCount} active · ${completedCount} completed · Total: ${tasks.length}`;
+
+        if (filteredTasks.length === 0) {
+            container.innerHTML = `<div class="empty-msg"><i class="fas fa-smile-wink"></i> No tasks here! Add something new.</div>`;
+            return;
+        }
+
+        container.innerHTML = filteredTasks.map(task => `
+            <div class="task-item" data-id="${task.id}">
+                <input type="checkbox" class="task-check" ${task.completed ? 'checked' : ''}>
+                <span class="task-text ${task.completed ? 'completed' : ''}">${escapeHtml(task.text)}</span>
+                <div class="task-actions">
+                    <button class="edit-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="delete-btn" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </div>
+        `).join('');
+
+        // attach event listeners to each task
+        document.querySelectorAll('.task-item').forEach(item => {
+            const id = parseInt(item.dataset.id);
+            const checkbox = item.querySelector('.task-check');
+            const editBtn = item.querySelector('.edit-btn');
+            const deleteBtn = item.querySelector('.delete-btn');
+
+            checkbox.addEventListener('change', () => toggleComplete(id));
+            editBtn.addEventListener('click', () => editTask(id));
+            deleteBtn.addEventListener('click', () => deleteTask(id));
+        });
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        const text = input.value.trim();
+        if (text === "") {
+            alert("⚠️ Please write a task!");
+            return;
+        }
+        const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+        tasks.push({ id: newId, text: text, completed: false });
+        saveTasks();
+        renderTasks();
+        input.value = "";
+        input.focus();
+    }
+
+    function toggleComplete(id) {
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+            task.completed = !task.completed;
+            saveTasks();
+            renderTasks();
+        }
+    }
+
+    function deleteTask(id) {
+        if (confirm("🗑️ Delete this task?")) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+        }
+    }
+
+    function editTask(id) {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+        const newText = prompt("✏️ Edit your task:", task.text);
+        if (newText !== null && newText.trim() !== "") {
+            task.text = newText.trim();
+            saveTasks();
+            renderTasks();
+        }
+    }
+
+    // filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.getAttribute('data-filter');
+            renderTasks();
+        });
+    });
+
+    document.getElementById('addBtn').addEventListener('click', addTask);
+    document.getElementById('taskInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTask();
+    });
+
+    // Dark mode
+    const themeBtn = document.getElementById('themeToggle');
+    const body = document.body;
+    if (localStorage.getItem('taskflow_theme') === 'dark') {
+        body.classList.add('dark');
+    }
+    themeBtn.addEventListener('click', () => {
+        body.classList.toggle('dark');
+        localStorage.setItem('taskflow_theme', body.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    loadTasks();
+</script>
+</body>
+</html>

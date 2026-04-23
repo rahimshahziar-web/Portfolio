@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherSphere 4D | Rahim Shah Ziar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 2rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff, #00d2ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border-radius: 3rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-box button {
+            background: linear-gradient(135deg, #00d2ff, #ff00ff);
+            border: none;
+            padding: 0 2rem;
+            border-radius: 3rem;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .search-box button:hover {
+            transform: scale(1.02);
+        }
+
+        .current-weather {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .temp {
+            font-size: 5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+
+        .city {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .details {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+            text-align: center;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .forecast-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .forecast-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 650px) {
+            .temp {
+                font-size: 3rem;
+            }
+            .city {
+                font-size: 1.5rem;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="weather-card">
+            <h1><i class="fas fa-cloud-sun"></i> WeatherSphere 4D</h1>
+            <p>🌍 Real-time weather data powered by OpenWeatherMap</p>
+
+            <div class="search-box">
+                <input type="text" id="cityInput" placeholder="Enter city name... e.g., London, Tokyo, New York" value="Kabul">
+                <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+            </div>
+
+            <div id="weatherResult">
+                <div class="current-weather">
+                    <i class="fas fa-spinner fa-pulse fa-2x"></i>
+                    <p>🌤️ Loading weather data...</p>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>✨ Developed by <strong>Rahim Shah Ziar</strong> | WeatherSphere 4D — Real-time Weather App</p>
+        </footer>
+    </div>
+
+    <script>
+        // ========== ACTIVE API KEY ==========
+        const API_KEY = "89e8e4d78bdf616509f58e234697c292";
+        
+        const cityInput = document.getElementById('cityInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const weatherResult = document.getElementById('weatherResult');
+
+        async function getWeather(city) {
+            weatherResult.innerHTML = '<div class="current-weather"><i class="fas fa-spinner fa-pulse fa-2x"></i><p>🌤️ Loading weather data...</p></div>';
+            
+            try {
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('❌ City not found. Please check the spelling!');
+                }
+                
+                const data = await response.json();
+                displayWeather(data);
+                
+                // Get 5-day forecast
+                const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`;
+                const forecastResponse = await fetch(forecastUrl);
+                const forecastData = await forecastResponse.json();
+                displayForecast(forecastData);
+                
+            } catch (error) {
+                weatherResult.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> ${error.message}<br>💡 Try: London, Dubai, Tokyo, or your city name</div>`;
+            }
+        }
+
+        function displayWeather(data) {
+            const temp = Math.round(data.main.temp);
+            const feelsLike = Math.round(data.main.feels_like);
+            const humidity = data.main.humidity;
+            const windSpeed = data.wind.speed;
+            const description = data.weather[0].description;
+            const cityName = data.name;
+            const country = data.sys.country;
+            
+            // Get weather icon
+            const iconCode = data.weather[0].icon;
+            const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+            
+            weatherResult.innerHTML = `
+                <div class="current-weather">
+                    <div class="city">📍 ${cityName}, ${country}</div>
+                    <img src="${iconUrl}" alt="${description}" style="width: 80px;">
+                    <div class="temp">${temp}°C</div>
+                    <div style="font-size: 1.2rem; text-transform: capitalize;">${description}</div>
+                    <div class="details">
+                        <div class="detail-item"><i class="fas fa-thermometer-half"></i> Feels like: ${feelsLike}°C</div>
+                        <div class="detail-item"><i class="fas fa-tint"></i> Humidity: ${humidity}%</div>
+                        <div class="detail-item"><i class="fas fa-wind"></i> Wind: ${windSpeed} m/s</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayForecast(data) {
+            const forecastList = data.list.filter((item, index) => index % 8 === 0).slice(0, 5);
+            
+            let forecastHtml = '<h3 style="margin: 1.5rem 0 1rem;"><i class="fas fa-calendar-week"></i> 📅 5-Day Forecast</h3><div class="forecast-grid">';
+            
+            forecastList.forEach(day => {
+                const date = new Date(day.dt * 1000);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                const temp = Math.round(day.main.temp);
+                const iconCode = day.weather[0].icon;
+                const iconUrl = `https://openweathermap.org/img/wn/${iconCode}.png`;
+                const description = day.weather[0].description;
+                
+                forecastHtml += `
+                    <div class="forecast-card">
+                        <div><strong>${dayName}</strong></div>
+                        <img src="${iconUrl}" alt="${description}">
+                        <div><strong>${temp}°C</strong></div>
+                        <small style="text-transform: capitalize;">${description}</small>
+                    </div>
+                `;
+            });
+            
+            forecastHtml += '</div>';
+            weatherResult.innerHTML += forecastHtml;
+        }
+
+        searchBtn.addEventListener('click', () => {
+            const city = cityInput.value.trim();
+            if (city) getWeather(city);
+        });
+
+        cityInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const city = cityInput.value.trim();
+                if (city) getWeather(city);
+            }
+        });
+
+        // Load default city
+        getWeather('Kabul');
+    </script>
+</body>
+</html>
